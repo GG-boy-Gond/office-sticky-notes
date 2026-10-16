@@ -1,0 +1,78 @@
+{
+  "name": "office-sticky-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "轻巧、可靠的本地桌面便签",
+  "author": "Office Notes",
+  "main": "src/main/index.cjs",
+  "scripts": {
+    "start": "electron . --data-dir=./data",
+    "test": "node --test test/*.test.cjs",
+    "test:desktop": "node test/desktop-smoke.cjs",
+    "check": "node scripts/check.cjs",
+    "build:dir": "node scripts/build.cjs",
+    "build:installer": "node scripts/build.cjs --installer",
+    "lint": "eslint src scripts test eslint.config.cjs",
+    "format": "prettier --write \"src/**/*.{js,cjs,html,css}\" \"scripts/*.cjs\" \"test/*.cjs\" \"*.cjs\" \"*.json\" \"*.md\"",
+    "format:check": "prettier --check \"src/**/*.{js,cjs,html,css}\" \"scripts/*.cjs\" \"test/*.cjs\" \"*.cjs\" \"*.json\" \"*.md\"",
+    "postinstall": "node scripts/install-runtime.cjs"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.9",
+    "exceljs": "4.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "electron": "42.11.15",
+    "electron-builder": "26.15.3",
+    "eslint": "10.12.0",
+    "globals": "17.13.0",
+    "playwright-core": "1.58.2",
+    "prettier": "3.9.10"
+  },
+  "build": {
+    "appId": "local.office.stickynotes",
+    "productName": "Office Notes",
+    "directories": {
+      "output": "outputs/desktop"
+    },
+    "files": [
+      "src/main/**/*",
+      "src/preload/**/*",
+      "src/renderer/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false,
+      "icon": "assets/app.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "桌面便签"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Office"
+    }
+  }
+}

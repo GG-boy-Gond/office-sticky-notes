@@ -1,0 +1,7 @@
+node_modules
+.cache
+work
+data
+outputs
+package-lock.json
+*.log

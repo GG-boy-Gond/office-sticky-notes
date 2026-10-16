@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>桌面便签 · Office Notes</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <div class="note-window" id="note-window">
+      <div id="note-background" class="note-background" aria-hidden="true"></div>
+      <header class="titlebar">
+        <span class="brand"><span class="brand-mark"></span>桌面便签</span>
+        <span class="brand-caption">Powered by 小王</span>
+      </header>
+      <div class="toolbar" id="toolbar">
+        <nav class="tabs" aria-label="便签列表">
+          <button class="tab active" data-view="todo" aria-selected="true">
+            Todo <span id="todo-count">0</span>
+          </button>
+          <button class="tab" data-view="done" aria-selected="false">
+            Done <span id="done-count">0</span>
+          </button>
+        </nav>
+        <div class="tools">
+          <button
+            class="icon-button"
+            data-command="export"
+            title="导出 Excel"
+            aria-label="导出 Excel"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M13 3H5v18h14V9l-6-6Z M13 3v6h6 M12 12v6m-3-3 3 3 3-3" />
+            </svg>
+          </button>
+          <button
+            class="icon-button"
+            data-command="hide"
+            title="隐藏到托盘"
+            aria-label="隐藏到托盘"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M3 12s3-7 9-7 9 7 9 7-3 7-9 7-9-7-9-7Z M3 3l18 18" />
+            </svg>
+          </button>
+          <button
+            class="icon-button"
+            id="lock-button"
+            data-command="lock"
+            title="鼠标穿透：关闭"
+            aria-label="切换鼠标穿透"
+            aria-pressed="false"
+          >
+            <svg viewBox="0 0 24 24">
+              <rect x="5" y="10" width="14" height="11" rx="3" />
+              <path id="lock-shackle" d="M8 10V7a4 4 0 0 1 8 0 M12 14v3" />
+            </svg>
+          </button>
+          <button
+            class="icon-button"
+            data-command="settings"
+            title="设置和帮助"
+            aria-label="设置和帮助"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1 1-3Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <main class="content" id="content" aria-label="便签内容">
+        <div id="task-list" class="task-list"></div>
+        <button id="add-note" class="add-note">
+          <span>＋</span> 写一条新便签 <kbd>Ctrl N</kbd>
+        </button>
+      </main>
+
+      <footer class="footer">
+        <span id="save-status" role="status">正在读取便签…</span>
+        <span id="footer-hint">单击编辑 · 双击完成</span>
+      </footer>
+
+      <section id="settings-panel" class="settings-panel" aria-label="设置" hidden>
+        <div class="panel-heading">
+          <div>
+            <span class="eyebrow">PREFERENCES</span>
+            <h1>随手记，安心存。</h1>
+          </div>
+          <button class="icon-button" data-command="close-settings" aria-label="关闭设置">✕</button>
+        </div>
+        <section class="appearance-settings" aria-label="便签外观">
+          <h2 class="settings-title">背景与文字</h2>
+          <div class="appearance-preview" aria-label="外观预览">
+            <div class="preview-background" id="preview-background"></div>
+            <span id="preview-text">今天，也要记得好好生活。</span>
+          </div>
+          <label class="setting-row slider-row" for="font-size">
+            <span
+              ><strong>字体大小 <output id="font-size-value">14 px</output></strong
+              ><small>10–36 px，同时调整待办、完成记录和编辑文字</small></span
+            >
+            <input type="range" id="font-size" min="10" max="36" step="1" value="14" />
+          </label>
+          <label class="setting-row">
+            <span><strong>背景颜色</strong><small>可与图片叠加；移除图片后使用纯色</small></span>
+            <input type="color" id="background-color" aria-label="背景颜色" value="#1a201d" />
+          </label>
+          <div class="setting-row">
+            <span
+              ><strong>本地背景图片</strong
+              ><small id="background-image-name">未选择图片</small></span
+            >
+            <button class="text-button" data-command="select-background">选择</button>
+            <button
+              class="text-button"
+              id="clear-background"
+              data-command="clear-background"
+              hidden
+            >
+              移除
+            </button>
+          </div>
+          <label class="setting-row slider-row" for="background-opacity">
+            <span
+              ><strong>背景透明度 <output id="background-opacity-value">91%</output></strong
+              ><small>0% 完全透明 · 100% 完全不透明</small></span
+            >
+            <input type="range" id="background-opacity" min="0" max="100" step="1" value="91" />
+          </label>
+          <label class="setting-row slider-row" for="text-opacity">
+            <span
+              ><strong>任务文字透明度 <output id="text-opacity-value">100%</output></strong
+              ><small>独立控制文字；100% 时清晰显示</small></span
+            >
+            <input type="range" id="text-opacity" min="0" max="100" step="1" value="100" />
+          </label>
+          <p class="appearance-hint">
+            只显示文字：背景设为 0%，文字设为
+            100%。鼠标移出后仅保留任务文字，移入便签即可显示操作按钮。设置面板始终保持清晰。
+          </p>
+        </section>
+        <label class="setting-row"
+          ><span><strong>开机启动</strong><small>登录电脑后自动显示便签</small></span
+          ><input type="checkbox" id="login-setting" role="switch"
+        /></label>
+        <div class="setting-row">
+          <span><strong>本地数据</strong><small>自动保存，并保留上一次备份</small></span
+          ><button class="text-button" data-command="folder">打开目录 ↗</button>
+        </div>
+        <div class="setting-row">
+          <span><strong>迁移旧便签</strong><small>导入原版 JSON，合并保留现有数据</small></span
+          ><button class="text-button" data-command="import">导入</button>
+        </div>
+        <div class="setting-row">
+          <span><strong>软件更新</strong><small id="update-message">正在读取更新状态…</small></span
+          ><button class="text-button" id="update-button" data-command="update">检查</button>
+        </div>
+        <div class="help-card">
+          <strong>让操作更顺手</strong>
+          <p>单击文字编辑，双击文字完成。拖动左侧手柄可排序；也可聚焦手柄后按 Alt ↑ / ↓ 调整。</p>
+          <p>Enter 保存 · Esc 撤销本次编辑<br />Ctrl N 新建 · Ctrl E 导出 · Ctrl , 设置</p>
+          <p>开启穿透后可操作后面的窗口；移到顶部工具栏，或从托盘菜单解除穿透。</p>
+        </div>
+        <div class="panel-footer">
+          <span id="app-version">Office Notes</span
+          ><button class="text-button danger" data-command="quit">退出应用</button>
+        </div>
+      </section>
+      <div id="toast" class="toast" role="status" hidden></div>
+      <canvas id="celebration" aria-hidden="true"></canvas>
+    </div>
+  </body>
+</html>
